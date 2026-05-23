@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#C0392B">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AVF Sécurité">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <title>AVF Sécurité — Alerte Arnaque</title>
+
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --rouge:     #C0392B;
+  --rouge-sombre: #96281B;
+  --rouge-pale:#FDEDEC;
+  --orange:    #E67E22;
+  --orange-pale:#FEF5E7;
+  --vert:      #1E8449;
+  --vert-pale: #EAFAF1;
+  --bleu:      #2E86C1;
+  --bleu-pale: #EBF5FB;
+  --bleu-avf:  #5997EA;
+  --gris:      #2C3E50;
+  --gris-doux: #7F8C8D;
+  --blanc:     #FFFFFF;
+  --fond:      #F4F6F8;
+  --rayon:     16px;
+  --ombre:     0 4px 20px rgba(0,0,0,.12);
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--fond);
+  color: var(--gris);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Écrans (navigation SPA) ──────────────────────────────────────────────── */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity .25s ease, transform .25s ease;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1; pointer-events: all; transform: translateX(0);
+}
+.screen.out {
+  opacity: 0; transform: translateX(-30px);
+}
+
+/* ─── Header commun ────────────────────────────────────────────────────────── */
+.header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px 10px;
+  background: var(--rouge);
+  color: var(--blanc);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  min-height: 60px;
+}
+.header-logo {
+  height: 36px; width: auto; flex-shrink: 0;
+}
+.header-title {
+  flex: 1;
+  font-size: 1.05rem; font-weight: 700; line-height: 1.2;
+  letter-spacing: .01em;
+}
+.header-back {
+  background: rgba(255,255,255,.2);
+  border: none; color: var(--blanc);
+  width: 44px; height: 44px;
+  border-radius: 50%; font-size: 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .15s;
+}
+.header-back:active { background: rgba(255,255,255,.35); }
+
+/* ─── Contenu ──────────────────────────────────────────────────────────────── */
+.content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ─── Carte ────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--blanc);
+  border-radius: var(--rayon);
+  padding: 18px 16px;
+  box-shadow: var(--ombre);
+}
+.card-titre {
+  font-size: 1rem; font-weight: 700; color: var(--rouge);
+  margin-bottom: 6px; line-height: 1.3;
+}
+
+/* ─── ÉCRAN 0 : Accueil ────────────────────────────────────────────────────── */
+#s0 { background: var(--rouge); }
+#s0 .header { background: var(--rouge-sombre); }
+
+.accueil-hero {
+  background: var(--rouge);
+  padding: 20px 16px 8px;
+  text-align: center;
+  color: var(--blanc);
+}
+.accueil-hero .icone-alerte { font-size: 3.5rem; line-height: 1; margin-bottom: 8px; }
+.accueil-hero h1 {
+  font-size: 1.35rem; font-weight: 800; line-height: 1.25;
+  margin-bottom: 6px;
+}
+.accueil-hero p { font-size: 1rem; opacity: .9; line-height: 1.4; }
+
+.accueil-body { background: var(--fond); border-radius: 24px 24px 0 0; padding: 20px 16px 24px; flex: 1; }
+
+.question {
+  font-size: 1.15rem; font-weight: 700; color: var(--gris);
+  text-align: center; margin-bottom: 16px; line-height: 1.3;
+}
+
+/* Boutons de choix de vecteur */
+.vecteur-grid { display: flex; flex-direction: column; gap: 12px; }
+
+.btn-vecteur {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--blanc);
+  border: 2.5px solid transparent;
+  border-radius: var(--rayon);
+  padding: 18px 20px;
+  cursor: pointer;
+  box-shadow: var(--ombre);
+  transition: all .18s;
+  text-align: left; width: 100%;
+  -webkit-appearance: none;
+}
+.btn-vecteur:active { transform: scale(.97); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+
+.btn-vecteur.appel  { border-color: var(--rouge); }
+.btn-vecteur.sms    { border-color: var(--orange); }
+.btn-vecteur.email  { border-color: var(--bleu); }
+
+.btn-vecteur .ico {
+  font-size: 2.2rem; line-height: 1; flex-shrink: 0;
+  width: 52px; text-align: center;
+}
+.btn-vecteur .txt {}
+.btn-vecteur .txt strong { display: block; font-size: 1.15rem; margin-bottom: 3px; }
+.btn-vecteur.appel  .txt strong { color: var(--rouge); }
+.btn-vecteur.sms    .txt strong { color: var(--orange); }
+.btn-vecteur.email  .txt strong { color: var(--bleu); }
+.btn-vecteur .txt span { font-size: .9rem; color: var(--gris-doux); line-height: 1.3; }
+.btn-vecteur .chevron { margin-left: auto; font-size: 1.2rem; color: var(--gris-doux); flex-shrink: 0; }
+
+.accueil-bottom {
+  margin-top: 4px; padding: 14px 16px;
+  background: var(--rouge-pale);
+  border-radius: var(--rayon);
+  border: 1.5px solid #F1948A;
+  font-size: .88rem; color: var(--rouge-sombre);
+  text-align: center; line-height: 1.5;
+}
+
+/* ─── ÉCRAN 1 : Protocole ──────────────────────────────────────────────────── */
+.etape {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--blanc); border-radius: var(--rayon);
+  padding: 16px; box-shadow: var(--ombre);
+}
+.etape-num {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; font-weight: 800; color: var(--blanc);
+  flex-shrink: 0; margin-top: 2px;
+}
+.etape-body { flex: 1; }
+.etape-body strong { display: block; font-size: 1.05rem; line-height: 1.3; margin-bottom: 4px; }
+.etape-body p { font-size: .92rem; color: var(--gris-doux); line-height: 1.45; }
+
+/* Phrase clé */
+.phrase-cle {
+  background: var(--blanc);
+  border: 3px solid var(--orange);
+  border-radius: var(--rayon);
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: var(--ombre);
+}
+.phrase-cle .label {
+  font-size: .78rem; text-transform: uppercase; letter-spacing: .08em;
+  font-weight: 700; color: var(--orange); margin-bottom: 10px;
+}
+.phrase-cle .texte {
+  font-size: 1.2rem; font-weight: 700; color: var(--gris);
+  line-height: 1.4; font-style: italic;
+}
+.phrase-cle .texte::before { content: '" '; color: var(--orange); }
+.phrase-cle .texte::after  { content: ' "'; color: var(--orange); }
+
+/* Signaux d'alarme */
+.alarmes {
+  background: var(--rouge-pale); border: 2px solid #F1948A;
+  border-radius: var(--rayon); padding: 14px 16px;
+}
+.alarmes-titre {
+  font-size: .82rem; text-transform: uppercase; letter-spacing: .07em;
+  font-weight: 700; color: var(--rouge); margin-bottom: 10px;
+}
+.alarmes-grille {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px;
+}
+.alarme-item {
+  display: flex; align-items: flex-start; gap: 6px;
+  font-size: .9rem; color: var(--rouge-sombre); line-height: 1.35;
+}
+.alarme-item::before { content: '⚠'; font-size: .8rem; flex-shrink: 0; margin-top: 2px; }
+
+/* ─── ÉCRAN 2 : Ressources ─────────────────────────────────────────────────── */
+.ressource-btn {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--blanc); border: none; border-radius: var(--rayon);
+  padding: 16px; box-shadow: var(--ombre);
+  width: 100%; cursor: pointer; text-align: left;
+  transition: all .18s; -webkit-appearance: none;
+  text-decoration: none; color: inherit;
+}
+.ressource-btn:active { transform: scale(.97); }
+.ressource-btn .ico { font-size: 2rem; flex-shrink: 0; width: 44px; text-align: center; }
+.ressource-btn .info {}
+.ressource-btn .info strong { display: block; font-size: 1rem; margin-bottom: 3px; line-height: 1.3; }
+.ressource-btn .info span { font-size: .88rem; color: var(--gris-doux); line-height: 1.35; }
+.ressource-btn .chevron { margin-left: auto; font-size: 1.1rem; color: var(--gris-doux); flex-shrink: 0; }
+
+.ressource-btn.urgence  { border-left: 5px solid var(--rouge); }
+.ressource-btn.officiel { border-left: 5px solid var(--bleu); }
+.ressource-btn.ia       { border-left: 5px solid var(--vert); }
+.ressource-btn.referent { border-left: 5px solid var(--bleu-avf); }
+
+.section-label {
+  font-size: .8rem; text-transform: uppercase; letter-spacing: .09em;
+  font-weight: 700; color: var(--gris-doux); padding: 0 4px;
+  margin-top: 4px;
+}
+
+/* Prompt Claude */
+.prompt-box {
+  background: var(--vert-pale); border: 2px solid var(--vert);
+  border-radius: var(--rayon); padding: 14px 16px;
+  font-size: .92rem; line-height: 1.5; color: #1A5C36;
+  font-style: italic;
+}
+.prompt-box .prompt-label {
+  font-style: normal; font-weight: 700; font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--vert); margin-bottom: 8px;
+}
+.copy-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 12px; padding: 12px;
+  background: var(--vert); border: none; border-radius: 10px;
+  color: var(--blanc); font-size: 1rem; font-weight: 700;
+  cursor: pointer; width: 100%; -webkit-appearance: none;
+  transition: background .15s;
+}
+.copy-btn:active { background: #1A5C36; }
+
+/* Footer AVF */
+.footer-avf {
+  text-align: center; padding: 12px 16px 20px;
+  font-size: .8rem; color: var(--gris-doux); line-height: 1.5;
+}
+.footer-avf img { height: 28px; vertical-align: middle; margin-right: 6px; }
+
+/* Indicateur de mise à jour hors-ligne */
+.offline-badge {
+  display: none;
+  position: fixed; top: 8px; right: 8px; z-index: 100;
+  background: var(--orange); color: var(--blanc);
+  font-size: .75rem; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+}
+body.offline .offline-badge { display: block; }
+</style>
+</head>
+<body>
+
+<div class="offline-badge">📵 Hors connexion</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ÉCRAN 0 — Accueil / Choix du vecteur
+═══════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="s0">
+
+  <div class="header" style="background:#96281B;">
+    <img class="header-logo" src="logo-avf.svg" alt="AVF Boulogne-Billancourt">
+    <div class="header-title">Alerte Arnaque</div>
+  </div>
+
+  <div class="accueil-hero">
+    <div class="icone-alerte">🛡️</div>
+    <h1>Quelque chose vous inquiète ?</h1>
+    <p>Cette application vous guide pas à pas.<br>Prenez votre temps.</p>
+  </div>
+
+  <div class="accueil-body">
+
+    <p class="question">Qu'avez-vous reçu ?</p>
+
+    <div class="vecteur-grid">
+
+      <button class="btn-vecteur appel" onclick="goProtocole('appel')">
+        <span class="ico">📞</span>
+        <span class="txt">
+          <strong>Un appel téléphonique</strong>
+          <span>Quelqu'un vous a appelé et vous êtes inquiet</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+
+      <button class="btn-vecteur sms" onclick="goProtocole('sms')">
+        <span class="ico">💬</span>
+        <span class="txt">
+          <strong>Un SMS</strong>
+          <span>Vous avez reçu un message texte suspect</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+
+      <button class="btn-vecteur email" onclick="goProtocole('email')">
+        <span class="ico">📧</span>
+        <span class="txt">
+          <strong>Un email</strong>
+          <span>Un courriel vous a mis mal à l'aise</span>
+        </span>
+        <span class="chevron">›</span>
+      </button>
+
+    </div>
+
+    <div class="accueil-bottom">
+      <strong>Rappel fondamental</strong><br>
+      Un vrai organisme accepte toujours que vous rappeliez.<br>
+      S'il insiste pour décider maintenant — c'est une arnaque.
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     ÉCRAN 1 — Protocole (contenu injecté dynamiquement)
+═══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="s1">
+
+  <div class="header" id="s1-header">
+    <button class="header-back" onclick="goBack()" aria-label="Retour">‹</button>
+    <div class="header-title" id="s1-title">Protocole</div>
+  </div>
+
+  <div class="content" id="s1-content">
+    <!-- contenu injecté par JS -->
+  </div>
+
+  <div style="padding:0 16px 16px;">
+    <button class="ressource-btn urgence" onclick="goRessources()" style="background:#FDEDEC;">
+      <span class="ico">🆘</span>
+      <span class="info">
+        <strong>Besoin d'aide immédiate ?</strong>
+        <span>Numéros d'urgence et ressources officielles</span>
+      </span>
+      <span class="chevron" style="color:#C0392B;">›</span>
+    </button>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     ÉCRAN 2 — Ressources d'urgence
+═══════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+
+  <div class="header">
+    <button class="header-back" onclick="goBack()" aria-label="Retour">‹</button>
+    <div class="header-title">Aide et recours</div>
+  </div>
+
+  <div class="content">
+
+    <p class="section-label">🚨 Urgence immédiate</p>
+
+    <a class="ressource-btn urgence" href="tel:0805805817">
+      <span class="ico">📞</span>
+      <span class="info">
+        <strong>0 805 805 817</strong>
+        <span>Info Escroqueries — Gratuit · Lun–Ven 9h–18h30<br>Signalement d'une arnaque en cours</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>
+
+    <a class="ressource-btn urgence" href="tel:17">
+      <span class="ico">🚓</span>
+      <span class="info">
+        <strong>17 — Police / Gendarmerie</strong>
+        <span>Si vous êtes en danger ou si l'argent a déjà été transféré</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>
+
+    <p class="section-label" style="margin-top:4px;">🇫🇷 Sites officiels de l'État</p>
+
+    <a class="ressource-btn officiel" href="https://www.cybermalveillance.gouv.fr" target="_blank" rel="noopener">
+      <span class="ico">🔍</span>
+      <span class="info">
+        <strong>Cybermalveillance.gouv.fr</strong>
+        <span>Diagnostic, conseils et signalement — site officiel de l'État</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>
+
+    <a class="ressource-btn officiel" href="https://www.service-public.fr/particuliers/vosdroits/F31704" target="_blank" rel="noopener">
+      <span class="ico">📋</span>
+      <span class="info">
+        <strong>Déposer une plainte</strong>
+        <span>Service-public.fr — Procédure de signalement d'escroquerie</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>
+
+    <p class="section-label" style="margin-top:4px;">🤖 Demander conseil à une IA</p>
+
+    <div class="card">
+      <div class="prompt-box">
+        <div class="prompt-label">💬 Copiez ce message, puis ouvrez Claude</div>
+        Je viens de recevoir un <span id="prompt-vecteur">message</span> qui m'inquiète. Aide-moi à voir les choses calmement. Pose-moi des questions simples, une par une. Ne me juge pas.
+      </div>
+      <button class="copy-btn" onclick="copyPrompt()">
+        <span id="copy-ico">📋</span> Copier ce message
+      </button>
+      <a href="https://claude.ai" target="_blank" rel="noopener"
+         style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:12px;background:#1E8449;border-radius:10px;color:#fff;font-weight:700;font-size:1rem;text-decoration:none;">
+        ↗ Ouvrir Claude
+      </a>
+    </div>
+
+    <p class="section-label" style="margin-top:4px;">🤝 Réseau AVF Boulogne-Billancourt</p>
+
+    <div class="ressource-btn referent" style="cursor:default;">
+      <span class="ico">👥</span>
+      <span class="info">
+        <strong>Référent numérique AVF</strong>
+        <span>Votre contact local — coordonnées remises lors de l'atelier.<br>
+        Appelez sans hésiter, même pour un simple doute.</span>
+      </span>
+    </div>
+
+    <a class="ressource-btn referent" href="https://www.avfboulognebillancourt.fr" target="_blank" rel="noopener">
+      <span class="ico">🌐</span>
+      <span class="info">
+        <strong>Site AVF Boulogne-Billancourt</strong>
+        <span>avfboulognebillancourt.fr</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>
+
+  </div>
+
+  <div class="footer-avf">
+    <img src="logo-avf.svg" alt="AVF BB">
+    Association AVF Boulogne-Billancourt<br>
+    Cycle numérique 2026–2027
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════════ -->
+<script>
+
+// ─── Données par vecteur ──────────────────────────────────────────────────────
+const PROTOCOLES = {
+
+  appel: {
+    titre: '📞 Appel suspect reçu',
+    couleur: '#C0392B',
+    etapes: [
+      {
+        num: '1',
+        bg: '#C0392B',
+        titre: 'Je m'arrête. Je ne décide rien maintenant.',
+        detail: 'Aucune vraie urgence ne disparaît en 10 minutes. Si on vous presse — c'est un signal d'alarme.'
+      },
+      {
+        num: '2',
+        bg: '#C0392B',
+        titre: 'Je dis cette phrase et je raccroche.',
+        detail: 'Voir la phrase ci-dessous. Pas besoin de donner d'explications ni de vous justifier.'
+      },
+      {
+        num: '3',
+        bg: '#1E8449',
+        titre: 'Je rappelle moi-même le bon numéro.',
+        detail: 'Le numéro officiel de votre banque est au dos de votre carte. Le numéro des impôts est sur impots.gouv.fr. Ne rappelez jamais le numéro qui vous a appelé.'
+      },
+      {
+        num: '4',
+        bg: '#2E86C1',
+        titre: 'J'appelle un proche ou mon référent AVF.',
+        detail: 'Parlez-en avant de faire quoi que ce soit. Deux avis valent mieux qu'un.'
+      }
+    ],
+    phrase: 'Je vous rappelle dans dix minutes après avoir consulté un proche.',
+    alarmes: [
+      'On exige une décision immédiate',
+      'On parle de vos comptes bancaires',
+      'On demande un virement urgent',
+      'On demande de ne rien dire à votre famille',
+      'C'est votre banque ou les impôts',
+      'On vous menace d'une amende ou arrestation',
+    ]
+  },
+
+  sms: {
+    titre: '💬 SMS suspect reçu',
+    couleur: '#E67E22',
+    etapes: [
+      {
+        num: '1',
+        bg: '#E67E22',
+        titre: 'Je ne clique sur aucun lien.',
+        detail: 'Un vrai SMS de banque ou d'organisme officiel ne contient jamais de lien à cliquer. Jamais.'
+      },
+      {
+        num: '2',
+        bg: '#E67E22',
+        titre: 'Je ne rappelle pas le numéro expéditeur.',
+        detail: 'Les numéros courts peuvent être usurpés. Si c'est votre banque, appelez le numéro au dos de votre carte.'
+      },
+      {
+        num: '3',
+        bg: '#1E8449',
+        titre: 'Je vérifie directement sur le site officiel.',
+        detail: 'Tapez vous-même l'adresse dans votre navigateur : impots.gouv.fr, ameli.fr, labanquepostale.fr… Ne passez jamais par un lien reçu.'
+      },
+      {
+        num: '4',
+        bg: '#2E86C1',
+        titre: 'Je signale le SMS suspect.',
+        detail: 'Transférez le SMS au 33700 (numéro national de signalement SMS frauduleux, gratuit). Ou signalez sur cybermalveillance.gouv.fr.'
+      }
+    ],
+    phrase: 'Je ne clique pas. Je vérifie directement sur le site officiel.',
+    alarmes: [
+      'Lien à cliquer dans le SMS',
+      'Remboursement inattendu proposé',
+      'Demande de coordonnées bancaires',
+      'Numéro expéditeur inhabituel',
+      'Urgence ou délai imposé',
+      'Impôts, banque, Ameli, colis…',
+    ]
+  },
+
+  email: {
+    titre: '📧 Email suspect reçu',
+    couleur: '#2E86C1',
+    etapes: [
+      {
+        num: '1',
+        bg: '#2E86C1',
+        titre: 'Je ne clique sur aucun lien, je n'ouvre pas les pièces jointes.',
+        detail: 'Même si l'email semble provenir de votre banque, des impôts ou d'un organisme connu.'
+      },
+      {
+        num: '2',
+        bg: '#2E86C1',
+        titre: 'Je vérifie l'adresse expéditeur.',
+        detail: 'L'adresse réelle est visible en appuyant sur le nom de l'expéditeur. Une vraie adresse officielle se termine par .gouv.fr, .labanquepostale.fr, etc. — pas par un nom bizarre ou des chiffres.'
+      },
+      {
+        num: '3',
+        bg: '#1E8449',
+        titre: 'Je vais directement sur le site officiel.',
+        detail: 'Tapez vous-même l'adresse dans votre navigateur. Si un vrai remboursement ou une vraie alerte existe, il apparaîtra dans votre espace personnel.'
+      },
+      {
+        num: '4',
+        bg: '#2E86C1',
+        titre: 'Je signale le mail suspect.',
+        detail: 'Transférez l'email à reportphishing@google.com (Gmail) ou utilisez le bouton "Signaler" de votre messagerie. Vous pouvez aussi le signaler sur signal-spam.fr.'
+      }
+    ],
+    phrase: 'Je ne clique pas. Je vais directement sur le site officiel en tapant l'adresse moi-même.',
+    alarmes: [
+      'Lien ou pièce jointe à ouvrir',
+      'Adresse expéditeur douteuse',
+      'Remboursement inattendu',
+      'Urgence ou délai imposé',
+      'Demande de mot de passe',
+      'Fautes d'orthographe, logo flou',
+    ]
+  }
+};
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+let currentVecteur = null;
+let history = ['s0'];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active', 'out');
+  });
+  document.getElementById(id).classList.add('active');
+  document.getElementById(id).scrollTop = 0;
+}
+
+function goBack() {
+  history.pop();
+  const prev = history[history.length - 1] || 's0';
+  showScreen(prev);
+}
+
+function goProtocole(vecteur) {
+  currentVecteur = vecteur;
+  const data = PROTOCOLES[vecteur];
+  history.push('s1');
+
+  // Header
+  document.getElementById('s1-header').style.background = data.couleur;
+  document.getElementById('s1-title').textContent = data.titre;
+
+  // Contenu
+  const c = document.getElementById('s1-content');
+  c.innerHTML = '';
+
+  // Étapes
+  data.etapes.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'etape';
+    div.innerHTML = `
+      <div class="etape-num" style="background:${e.bg}">${e.num}</div>
+      <div class="etape-body">
+        <strong>${e.titre}</strong>
+        <p>${e.detail}</p>
+      </div>`;
+    c.appendChild(div);
+  });
+
+  // Phrase clé
+  const pc = document.createElement('div');
+  pc.className = 'phrase-cle';
+  pc.innerHTML = `
+    <div class="label">📢 Dites cette phrase</div>
+    <div class="texte">${data.phrase}</div>`;
+  c.appendChild(pc);
+
+  // Signaux d'alarme
+  const al = document.createElement('div');
+  al.className = 'alarmes';
+  al.innerHTML = `<div class="alarmes-titre">⚠ Méfiez-vous si…</div>
+    <div class="alarmes-grille">${
+      data.alarmes.map(a => `<div class="alarme-item">${a}</div>`).join('')
+    }</div>`;
+  c.appendChild(al);
+
+  showScreen('s1');
+}
+
+function goRessources() {
+  history.push('s2');
+  // Mettre à jour le prompt selon le vecteur
+  if (currentVecteur) {
+    const labels = { appel: 'appel téléphonique', sms: 'SMS', email: 'email' };
+    document.getElementById('prompt-vecteur').textContent = labels[currentVecteur] || 'message';
+  }
+  showScreen('s2');
+}
+
+// ─── Copier le prompt ─────────────────────────────────────────────────────────
+function copyPrompt() {
+  const label = currentVecteur
+    ? { appel: 'appel téléphonique', sms: 'SMS', email: 'email' }[currentVecteur]
+    : 'message';
+  const text = `Je viens de recevoir un ${label} qui m'inquiète. Aide-moi à voir les choses calmement. Pose-moi des questions simples, une par une. Ne me juge pas.`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const ico = document.getElementById('copy-ico');
+    ico.textContent = '✅';
+    btn.textContent = ' Copié !';
+    btn.prepend(ico);
+    setTimeout(() => {
+      ico.textContent = '📋';
+      btn.innerHTML = '';
+      btn.appendChild(ico);
+      btn.append(' Copier ce message');
+    }, 2500);
+  }).catch(() => {
+    // Fallback pour les anciens appareils
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  });
+}
+
+// ─── Hors connexion ───────────────────────────────────────────────────────────
+window.addEventListener('online',  () => document.body.classList.remove('offline'));
+window.addEventListener('offline', () => document.body.classList.add('offline'));
+
+// ─── Service Worker ───────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    console.log('SW enregistré', reg.scope);
+  }).catch(err => {
+    console.warn('SW non disponible', err);
+  });
+}
+
+</script>
+</body>
+</html>
