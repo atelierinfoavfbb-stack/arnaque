@@ -442,7 +442,7 @@ body.offline .offline-badge { display: block; }
     <div class="card">
       <div class="prompt-box">
         <div class="prompt-label">💬 Copiez ce message, puis ouvrez Claude</div>
-        Je viens de recevoir un <span id="prompt-vecteur">message</span> qui m'inquiète. Aide-moi à voir les choses calmement. Pose-moi des questions simples, une par une. Ne me juge pas.
+        Je viens de recevoir un <span id="prompt-vecteur">message</span> qui m'inquiète. Aide-moi à voir les choses calmement. Guide-moi pour te donner les informations dont tu as besoin. Pose-moi des questions auxquelles je peux répondre par oui ou par non.
       </div>
       <button class="copy-btn" onclick="copyPrompt()">
         <span id="copy-ico">📋</span> Copier ce message
@@ -499,14 +499,14 @@ const PROTOCOLES = {
       {
         num: '1',
         bg: '#C0392B',
-        titre: 'Je m'arrête. Je ne décide rien maintenant.',
-        detail: 'Aucune vraie urgence ne disparaît en 10 minutes. Si on vous presse — c'est un signal d'alarme.'
+        titre: `Je m'arrête. Je ne décide rien maintenant.`,
+        detail: `Aucune vraie urgence ne disparaît en 10 minutes. Si on vous presse — c'est un signal d'alarme.`
       },
       {
         num: '2',
         bg: '#C0392B',
         titre: 'Je dis cette phrase et je raccroche.',
-        detail: 'Voir la phrase ci-dessous. Pas besoin de donner d'explications ni de vous justifier.'
+        detail: `Voir la phrase ci-dessous. Pas besoin de donner d'explications ni de vous justifier.`
       },
       {
         num: '3',
@@ -517,8 +517,8 @@ const PROTOCOLES = {
       {
         num: '4',
         bg: '#2E86C1',
-        titre: 'J'appelle un proche ou mon référent AVF.',
-        detail: 'Parlez-en avant de faire quoi que ce soit. Deux avis valent mieux qu'un.'
+        titre: `J'appelle un proche ou mon référent AVF.`,
+        detail: `Parlez-en avant de faire quoi que ce soit. Deux avis valent mieux qu'un.`
       }
     ],
     phrase: 'Je vous rappelle dans dix minutes après avoir consulté un proche.',
@@ -527,8 +527,8 @@ const PROTOCOLES = {
       'On parle de vos comptes bancaires',
       'On demande un virement urgent',
       'On demande de ne rien dire à votre famille',
-      'C'est votre banque ou les impôts',
-      'On vous menace d'une amende ou arrestation',
+      `C'est votre banque ou les impôts`,
+      `On vous menace d'une amende ou arrestation`,
     ]
   },
 
@@ -540,19 +540,19 @@ const PROTOCOLES = {
         num: '1',
         bg: '#E67E22',
         titre: 'Je ne clique sur aucun lien.',
-        detail: 'Un vrai SMS de banque ou d'organisme officiel ne contient jamais de lien à cliquer. Jamais.'
+        detail: `Un vrai SMS de banque ou d'organisme officiel ne contient jamais de lien à cliquer. Jamais.`
       },
       {
         num: '2',
         bg: '#E67E22',
         titre: 'Je ne rappelle pas le numéro expéditeur.',
-        detail: 'Les numéros courts peuvent être usurpés. Si c'est votre banque, appelez le numéro au dos de votre carte.'
+        detail: `Les numéros courts peuvent être usurpés. Si c'est votre banque, appelez le numéro au dos de votre carte.`
       },
       {
         num: '3',
         bg: '#1E8449',
         titre: 'Je vérifie directement sur le site officiel.',
-        detail: 'Tapez vous-même l'adresse dans votre navigateur : impots.gouv.fr, ameli.fr, labanquepostale.fr… Ne passez jamais par un lien reçu.'
+        detail: `Tapez vous-même l'adresse dans votre navigateur : impots.gouv.fr, ameli.fr, labanquepostale.fr… Ne passez jamais par un lien reçu.`
       },
       {
         num: '4',
@@ -579,36 +579,36 @@ const PROTOCOLES = {
       {
         num: '1',
         bg: '#2E86C1',
-        titre: 'Je ne clique sur aucun lien, je n'ouvre pas les pièces jointes.',
-        detail: 'Même si l'email semble provenir de votre banque, des impôts ou d'un organisme connu.'
+        titre: `Je ne clique sur aucun lien, je n'ouvre pas les pièces jointes.`,
+        detail: `Même si l'email semble provenir de votre banque, des impôts ou d'un organisme connu.`
       },
       {
         num: '2',
         bg: '#2E86C1',
-        titre: 'Je vérifie l'adresse expéditeur.',
-        detail: 'L'adresse réelle est visible en appuyant sur le nom de l'expéditeur. Une vraie adresse officielle se termine par .gouv.fr, .labanquepostale.fr, etc. — pas par un nom bizarre ou des chiffres.'
+        titre: `Je vérifie l'adresse expéditeur.`,
+        detail: `L'adresse réelle est visible en appuyant sur le nom de l'expéditeur. Une vraie adresse officielle se termine par .gouv.fr, .labanquepostale.fr, etc. — pas par un nom bizarre ou des chiffres.`
       },
       {
         num: '3',
         bg: '#1E8449',
         titre: 'Je vais directement sur le site officiel.',
-        detail: 'Tapez vous-même l'adresse dans votre navigateur. Si un vrai remboursement ou une vraie alerte existe, il apparaîtra dans votre espace personnel.'
+        detail: `Tapez vous-même l'adresse dans votre navigateur. Si un vrai remboursement ou une vraie alerte existe, il apparaîtra dans votre espace personnel.`
       },
       {
         num: '4',
         bg: '#2E86C1',
         titre: 'Je signale le mail suspect.',
-        detail: 'Transférez l'email à reportphishing@google.com (Gmail) ou utilisez le bouton "Signaler" de votre messagerie. Vous pouvez aussi le signaler sur signal-spam.fr.'
+        detail: `Transférez l'email à reportphishing@google.com (Gmail) ou utilisez le bouton "Signaler" de votre messagerie. Vous pouvez aussi le signaler sur signal-spam.fr.`
       }
     ],
-    phrase: 'Je ne clique pas. Je vais directement sur le site officiel en tapant l'adresse moi-même.',
+    phrase: `Je ne clique pas. Je vais directement sur le site officiel en tapant l'adresse moi-même.`,
     alarmes: [
       'Lien ou pièce jointe à ouvrir',
       'Adresse expéditeur douteuse',
       'Remboursement inattendu',
       'Urgence ou délai imposé',
       'Demande de mot de passe',
-      'Fautes d'orthographe, logo flou',
+      `Fautes d'orthographe, logo flou`,
     ]
   }
 };
@@ -692,7 +692,7 @@ function copyPrompt() {
   const label = currentVecteur
     ? { appel: 'appel téléphonique', sms: 'SMS', email: 'email' }[currentVecteur]
     : 'message';
-  const text = `Je viens de recevoir un ${label} qui m'inquiète. Aide-moi à voir les choses calmement. Pose-moi des questions simples, une par une. Ne me juge pas.`;
+  const text = `Je viens de recevoir un ${label} qui m'inquiète. Aide-moi à voir les choses calmement. Guide-moi pour te donner les informations dont tu as besoin. Pose-moi des questions auxquelles je peux répondre par oui ou par non.`;
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.copy-btn');
     const ico = document.getElementById('copy-ico');
